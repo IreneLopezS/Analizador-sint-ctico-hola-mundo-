@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Léxico y Sintáctico</title>
+    <style>
+        body {
+        font-family: time;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-image: url('fondo1.jpg');
+        background-size: cover; /* Hace que la imagen cubra todo el fondo */
+        background-repeat: no-repeat; /* Evita que la imagen se repita */
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: url('fondo2.jpg');
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgb(243, 239, 239);
+            text-align: center;
+        }
+
+        .container h1 {
+            color: rgb(179, 32, 179);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #c3c8e7;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button, input[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #6822b8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #7d36f0ea;
+        }
+
+        .bottom-section {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .bottom-section table {
+            width: 45%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            background-color: white; 
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analizador Léxico y Sintáctico</h1>
+
+        <form id="lexicalForm">
+            <textarea id="inputText" placeholder="Inserta un texto aquí"></textarea>
+            <button type="button" onclick="analyzeCode()">Analizar</button>
+        </form>
+
+        <div class="bottom-section">
+            <div>
+                <h2>Analizador Léxico</h2>
+                <table id="lexicalTable">
+                    <tr>
+                        <th>Línea</th>
+                        <th>Carácter</th>
+                        <th>Símbolo</th>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                <h2>Analizador Sintáctico</h2>
+                <table id="syntacticTable">
+                    <tr>
+                        <th>Línea</th>
+                        <th>Carácter</th>
+                        <th>Símbolo</th>
+                        <th>Estructura</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        function analyzeCode() {
+            // Obtener el texto ingresado
+            const inputText = document.getElementById("inputText").value;
+
+            // Separar las palabras del texto
+            const tokens = inputText.split(/\s+/);
+
+            // Limpiar las tablas anteriores
+            document.getElementById("lexicalTable").innerHTML = "<tr><th>Línea</th><th>Carácter</th><th>Símbolo</th></tr>";
+            document.getElementById("syntacticTable").innerHTML = "<tr><th>Línea</th><th>Carácter</th><th>Símbolo</th><th>Estructura</th></tr>";
+
+            // Variables para almacenar los resultados
+            const lexicalResults = [];
+            const syntacticResults = [];
+
+            // Recorrer los tokens y analizarlos
+            tokens.forEach(function(token, index) {
+                // Analizar léxico
+                const lexicalResult = {
+                    line: index + 1,
+                    character: token,
+                    symbol: isReservedWord(token) ? 'Palabra Reservada' : 'Identificador'
+                };
+                lexicalResults.push(lexicalResult);
+
+                // Analizar sintáctico
+                const syntacticResult = {
+                    line: index + 1,
+                    character: token,
+                    symbol: lexicalResult.symbol,
+                    correctStructure: isCorrectStructure(token),
+                    incorrectStructure: !isCorrectStructure(token)
+                };
+                syntacticResults.push(syntacticResult);
+            });
+            // Rellenar las tablas
+            lexicalResults.forEach(function(result) {
+                const row = document.createElement("tr");
+                for (const key of ['line', 'character', 'symbol']) { // Especificamos las columnas exactas
+                    const cell = document.createElement("td");
+                    cell.textContent = result[key];
+                    row.appendChild(cell);
+                }
+                document.getElementById("lexicalTable").appendChild(row);
+            });
+            
+            syntacticResults.forEach(function(result) {
+                const row = document.createElement("tr");
+                for (const key in result) {
+                    if (key !== 'incorrectStructure') { 
+                        const cell = document.createElement("td");
+                        cell.textContent = result[key];
+                        row.appendChild(cell);
+                    }
+                }
+                document.getElementById("syntacticTable").appendChild(row);
+            });
+
+            // Limpiar el área de texto
+            document.getElementById("inputText").value = '';
+        }
+
+        // Función para determinar si un token es una palabra reservada
+        function isReservedWord(token) {
+            const reservedWords = ['for'];
+            return reservedWords.includes(token);
+        }
+
+        // Función para determinar si un token tiene una estructura correcta
+        function isCorrectStructure(token) {
+            // Expresión regular para validar identificadores: comienza con letra y puede seguir con letras o números
+            const identifierRegex = /^[a-zA-Z][a-zA-Z0-9]*$/;
+            // Verificamos si el token es la palabra reservada 'for' o si cumple con el patrón de un identificador válido
+            return token === 'for' || identifierRegex.test(token);
+        }
+    </script>
+</body>
+</html>
+
+
